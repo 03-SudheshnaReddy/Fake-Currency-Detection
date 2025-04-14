@@ -17,28 +17,7 @@ This project analyzes and classifies currency notes as **real or fake** by combi
 
 ---
 
-##  Project Structure
-
-```
-├── dataset/                         # Image datasets (real & fake notes)
-├── rois/                            # Region of Interest for feature extraction
-├── KNN/
-│   ├── extracted_features_200.xlsx # Feature matrix for training
-│   ├── extracted_features_500.xlsx # Extended feature matrix
-│   ├── knn_currency_model.pkl      # Trained KNN model
-│   ├── KNN.ipynb                   # Notebook to train and test KNN
-│   ├── tempCodeRunnerFile.py       # Local test script
-├── DATSET_PREP.ipynb               # Notebook for image preprocessing
-├── app.py                          # Flask app to integrate frontend and backend
-├── denomination.py                 # Extract denomination & reference image setup
-├── project.py                      # Main image processing pipeline
-├── .venv/                          # Virtual environment (ignored in `.gitignore`)
-├── README.md                       # This file
-```
-
----
-
-## 🧠 Methodologies Used
+## Methodologies Used
 
 ### 1.  Image Processing (Baseline)
 - **Thresholding & Morphological Filtering** to isolate specific regions.
@@ -75,6 +54,13 @@ The project is deployed using Flask and supports real-time user uploads.
 4. Upload any note image via the Detector page — the result will be displayed instantly.
 
 ---
+
+## Website demo
+![image](https://github.com/user-attachments/assets/e3181104-c7e7-4ba7-b736-97299e1ac50d)
+![image](https://github.com/user-attachments/assets/401f358f-de8f-44a1-af63-ca6e9c5a262e)
+![image](https://github.com/user-attachments/assets/d174a06c-b8e9-4bec-a547-dcb3405d66af)
+
+----
 
 ##  Output Metrics
 
