@@ -1,0 +1,84 @@
+import re
+import subprocess
+import os
+
+# List of suspicious keywords (expand as needed)
+SUSPICIOUS_KEYWORDS = [
+    "GetProcAddress", "LoadLibrary", "VirtualAlloc", "WinExec",
+    "cmd.exe", "powershell", "regsvr32", "rundll32",
+    "http://", "https://", "base64", "decrypt", "AES", "XOR"
+]
+
+def extract_strings(file_path, min_length=4):
+    """Extracts ASCII and Unicode strings from a binary file."""
+    with open(file_path, "rb") as f:
+        data = f.read()
+    
+    # Extract ASCII strings
+    ascii_strings = re.findall(rb"[ -~]{%d,}" % min_length, data)
+    
+    # Extract Unicode strings
+    unicode_strings = re.findall(rb"(?:[\x20-\x7E][\x00]){%d,}" % min_length, data)
+
+    # Convert to readable format
+    extracted = [s.decode("utf-8", errors="ignore") for s in ascii_strings]
+    extracted += [s.decode("utf-16", errors="ignore") for s in unicode_strings]
+
+    return extracted
+
+def check_suspicious_strings(strings):
+    """Checks extracted strings for suspicious keywords."""
+    found = [s for s in strings if any(k in s for k in SUSPICIOUS_KEYWORDS)]
+    return found
+
+def run_die_analysis(file_path, die_path="diec"):
+    """Runs Detect It Easy (DIE) CLI on the file and returns the result."""
+    try:
+        result = subprocess.run([die_path, file_path], capture_output=True, text=True)
+        return result.stdout
+    except Exception as e:
+        return f"Error running DIE: {e}"
+
+def main(file_path):
+    print(f"🔍 Analyzing {file_path}...")
+
+    # Step 1: Extract strings
+    strings = extract_strings(file_path)
+    print(f"✅ Extracted {len(strings)} strings.")
+
+    # Step 2: Check for suspicious strings
+    suspicious_strings = check_suspicious_strings(strings)
+    
+    if suspicious_strings:
+        print("⚠️ Suspicious strings found!")
+        for s in suspicious_strings:
+            print(f"  - {s}")
+    else:
+        print("✅ No immediate suspicious strings found.")
+
+    # Save strings to file
+    with open("extracted_strings.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(strings))
+
+    # # Step 3: Run DIE for packer detection
+    # die_output = run_die_analysis(file_path)
+    # print("\n🔍 DIE Analysis Result:")
+    # print(die_output)
+
+    # Save results to a log file
+    with open("analysis_report.txt", "w", encoding="utf-8") as f:
+        f.write("Extracted Strings:\n")
+        f.write("\n".join(strings))
+        f.write("\n\nSuspicious Strings:\n")
+        f.write("\n".join(suspicious_strings) if suspicious_strings else "None found.")
+        f.write("\n\nDIE Analysis:\n")
+        # f.write(die_output)
+
+    print("\n📜 Report saved as 'analysis_report.txt'.")
+
+if __name__ == "__main__":
+    file_path = input("Enter the path to the suspicious file: ").strip()
+    if os.path.exists(file_path):
+        main(file_path)
+    else:
+        print("❌ File not found!")
